@@ -1,35 +1,47 @@
 #include "shellheader.h"
 
 /**
- * tostring - converts an int to a string
- * @num: int to be converted
+ * long_to_string - convert number to a string.
+ * @number: number to convert
+ * @string: buffer to save the num as a string.
+ * @base: base for conversion
  *
- * Return: pointer to string containing int
+ * Return: Nothing.
  */
-char *tostring(int num)
+void long_to_string(long number, char *string, int base)
 {
-	char *str = NULL;
-	int i, rem, len = 0, n;
+	int index = 0, inNegative = 0;
+	long quotient = number;
+	char letters[] = "0123456789abcdef";
 
-	n = num;
-	while (n != 0)
+	if (quotient == 0)
 	{
-		len++;
-		n /= 10;
+		string[index++] = '0';
 	}
-	str = (char *)malloc(sizeof(char) * (len + 1));
-	if (!str)
+
+	if (string[0] == '-')
 	{
-		free(str);
-		perror("Error: ");
-		return (NULL);
+		inNegative = 1;
 	}
-	for (i = 0; i < len; i++)
+
+	while (quotient)
 	{
-		rem = num % 10;
-		num = num / 10;
-		str[len - (i + 1)] = rem + '0';
+		if (quotient < 0)
+		{
+			string[index++] = letters[-(quotient % base)];
+		}
+		else
+		{
+			string[index++] = letters[quotient % base];
+			quotient /= base;
+		}
 	}
-	str[len] = '\0';
-	return (str);
+
+	if (inNegative)
+	{
+		string[index++] = '-';
+	}
+
+	string[index] = '\0';
+	str_reverse(string);
 }

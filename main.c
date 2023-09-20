@@ -1,66 +1,98 @@
 #include "shellheader.h"
 
 /**
- *
- * main - A basic shell that executes commands with their full path,
- * without any arguments.
- * @argc: The number of arguments passed to the function.
- *
- * @argv: An array of strings representing the arguments.
- *
- * Return: Always 0.
-*/
-int main(int argc __attribute__((unused)), char **argv)
+ * main - Start the shell
+ * @argc: Argument count
+ * @argv: Argument vector
+ * @env: Environment variable
+ * Return: 0 on success
+ */
+int main(int argc, char *argv[], char *env[])
 {
-	ssize_t k = 0;
-	char **args, *my_env[60], *command = NULL;
+	program_info program_info_struct = {NULL}, *data = &program_info_struct;
 
-	signal(SIGINT, handle_sigint);
-	for (k = 0; environ[k]; k++)
+	initialize_data(data, argc, argv, env);
+
+	signal(SIGINT, handle_ctrl_c);
+
+	if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && argc == 1)
 	{
-		my_env[k] = _strdup(environ[k]);
-		my_env[k] = NULL;
-		while (1)
-		{
-			k = isatty(STDIN_FILENO);
-			if (k == 1)
-			{
-				write(STDOUT_FILENO, "$ ", 2);
-				command = _getline(argv);
-			}
-			if (command != NULL)
-			{
-				args = parsecommand(command);
-			}
-			if (args == NULL)
-			{
-				perror(argv[0]);
-			}
-			if (_strcmp(args[0], "exit") == 0)
-			{
-				shell_exit(args, my_env, command);
-				return (0);
-			}
-			else if (_strcmp(args[0], "cd") == 0)
-			{
-				if (_cd(args, my_env) != 0)
-				{
-					perror("cd");
-				}
-			}
-			exec_func(args, my_env, argv);
-		}
-		if (k != 1)
-		{
-			break;
-		}
-		free(command);
-		free_2d(args);
-		free(args);
+		errno = 2;
+		_print("$ ");
 	}
-	free(command);
-	free_2d(args);
-	free(args);
-	free_2d(my_env);
+	errno = 0;
 	return (0);
+}
+
+/**
+ * handle_ctrl_c - Print the prompt
+ * @opr: Option of the prototype (UNUSED)
+ */
+void handle_ctrl_c(int opr __attribute__((unused)))
+{
+	_print("\n");
+	_print("$");
+}
+
+/**
+ * initialize_data - Initialize struct with the info of the program
+ * @data: Ptr to program_info structure
+ * @argv: Argument vector
+ * @env: Environment
+ * @argc: Argument count
+ */
+void initialize_data(program_info *data, int argc, char *argv[], char **env)
+{
+	int i = 0;
+
+	data->program_name = argv[0];
+	data->input_line = NULL;
+	data->command_name = NULL;
+	data->exec_counter = 0;
+
+	if (argc == 1)
+		data->file_descriptor = STDIN_FILENO;
+	else
+	{
+		data->file_descriptor = open(argv[1], O_RDONLY);
+		if (data->file_descriptor == -1)
+		{
+			_printe(data->program_name);
+			_printe(": 0: Can't open ");
+			_printe(argv[1]);
+			_printe("\n");
+			exit(127);
+		}
+	}
+	data->tokens = NULL;
+	data->env = malloc(sizeof(char *) * 50);
+	if (env)
+	{
+		for (; env[i]; i++)
+		{
+			data->env[i] = _strdup(env[i]);
+		}
+	}
+	data->env[i] = NULL;
+	env = data->env;
+
+	data->alias_list = malloc(sizeof(char *) * 20);
+	for (i = 0; i < 20; i++)
+	{
+		data->alias_list[i] = NULL;
+	}
+}
+
+/**
+ * sisifo - loops the prompt
+ * @prompt: prompt
+ * @data: infinite loop for prompt
+ */
+void sisifo(program_info *data)
+{
+	while (++(data->exec_counter))
+	{
+		_print("$ ");
+	}
+	free(data);
 }

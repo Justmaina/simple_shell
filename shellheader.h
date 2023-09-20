@@ -18,6 +18,20 @@ extern char **environ;
 #define BUFSIZE 1024
 #define PRINTER(c) (write(STDOUT_FILENO, c, _strlen(c)))
 
+typedef struct info
+{
+	char *program_name;
+	char *input_line;
+	char *command_name;
+	int exec_counter;
+	int file_descriptor;
+	char **tokens;
+	char **env;
+	char **alias_list;
+} program_info;
+
+#define PROMPT_MESSAGE "$"
+
 int _putchar(char c);
 int display_help(char **cmd, int er __attribute__((unused)));
 int disp_hist(char **c __attribute__((unused)), int s __attribute__((unused)));
@@ -52,5 +66,14 @@ void hash_handle(char *buff);
 char *_getline(char **argv);
 void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
 char *_memcpy(char *dest, char *src, unsigned int n);
+void handle_ctrl_c(int opr __attribute__((unused)));
+void initialize_data(program_info *data, int argc, char *argv[], char **env);
+void sisifo(program_info *data);
+int main(int argc, char *argv[], char *env[]);
+int _print(char *string);
+int _printe(char *string);
+int _print_error(int errorcode, program_info *data);
+void long_to_string(long number, char *string, int base);
+void str_reverse(char *string);
 
 #endif
