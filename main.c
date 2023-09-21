@@ -85,7 +85,6 @@ void initialize_data(program_info *data, int argc, char *argv[], char **env)
 
 /**
  * sisifo - loops the prompt
- * @prompt: prompt
  * @data: infinite loop for prompt
  */
 void sisifo(program_info *data)
