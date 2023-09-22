@@ -1,150 +1,41 @@
 #include "header.h"
-
 /**
- * str_length - return length of string
- * @string: ptr to str
- * Return: length of str
+ * tokenize - this function separate the string using a designed delimiter
+ * @data: a pointer to the program's data
+ * Return: an array of the different parts of the string
  */
-int str_length(char *string)
+void tokenize(program_info *data)
 {
-	int length = 0;
+	char *delimiter = " \t";
+	int i, j, tracker = 2, length;
 
-	if (string == NULL)
-		return (0);
-
-	while (string[length++] != '\0')
+	length = str_length(data->input_line);
+	if (length)
 	{
-	}
-	return (--length);
-}
-
-/**
- * str_duplicate - it duplicates the string
- * @string: str to be duplicated
- * Return: ptr to the array
- */
-char *str_duplicate(char *string)
-{
-	char *result;
-	int length, i;
-
-	if (string == NULL)
-		return (NULL);
-
-	length = str_length(string) + 1;
-
-	result = malloc(sizeof(char) * length);
-
-	if (result == NULL)
-	{
-		errno = ENOMEM;
-		perror("Error");
-		return (NULL);
-	}
-	for (i = 0; i < length ; i++)
-	{
-		result[i] = string[i];
+		if (data->input_line[length - 1] == '\n')
+			data->input_line[length - 1] = '\0';
 	}
 
-	return (result);
-}
-
-/**
- * str_compare - Compare strings
- * @string1: String on
- * @string2: String two
- * @number: num of char to be compared, 0 if infinite
- * Return: 1 if the strings are similar, 0 if the strings not
- */
-int str_compare(char *string1, char *string2, int number)
-{
-	int iterator;
-
-	if (string1 == NULL && string2 == NULL)
-		return (1);
-
-	if (string1 == NULL || string2 == NULL)
-		return (0);
-
-	if (number == 0)
+	for (i = 0; data->input_line[i]; i++)
 	{
-		if (str_length(string1) != str_length(string2))
-			return (0);
-		for (iterator = 0; string1[iterator]; iterator++)
+		for (j = 0; delimiter[j]; j++)
 		{
-			if (string1[iterator] != string2[iterator])
-				return (0);
+			if (data->input_line[i] == delimiter[j])
+				tracker++;
 		}
-		return (1);
-	}
-	else
-	{
-		for (iterator = 0; iterator < number ; iterator++)
-		{
-			if (string1[iterator] != string2[iterator])
-			return (0);
-		}
-		return (1);
-	}
-}
-
-/**
- * str_concat - concatenate strings.
- * @string1: String one
- * @string2: String two
- *
- * Return: ptr to the str
- */
-char *str_concat(char *string1, char *string2)
-{
-	char *result;
-	int length1 = 0, length2 = 0;
-
-	if (string1 == NULL)
-		string1 = "";
-	length1 = str_length(string1);
-
-	if (string2 == NULL)
-		string2 = "";
-	length2 = str_length(string2);
-
-	result = malloc(sizeof(char) * (length1 + length2 + 1));
-	if (result == NULL)
-	{
-		errno = ENOMEM;
-		perror("Error");
-		return (NULL);
 	}
 
-	for (length1 = 0; string1[length1] != '\0'; length1++)
-		result[length1] = string1[length1];
-	free(string1);
-
-	for (length2 = 0; string2[length2] != '\0'; length2++)
+	data->tokens = malloc(tracker * sizeof(char *));
+	if (data->tokens == NULL)
 	{
-		result[length1] = string2[length2];
-		length1++;
+		perror(data->program_name);
+		exit(errno);
 	}
-
-	result[length1] = '\0';
-	return (result);
-}
-/**
- * str_reverse - fnx to reverse a string.
- *
- * @string: ptr to str.
- * Return: void.
- */
-void str_reverse(char *string)
-{
-
-	int i = 0, length = str_length(string) - 1;
-	char hold;
-
-	while (i < length)
+	i = 0;
+	data->tokens[i] = str_duplicate(_strtok(data->input_line, delimiter));
+	data->command_name = str_duplicate(data->tokens[0]);
+	while (data->tokens[i++])
 	{
-		hold = string[i];
-		string[i++] = string[length];
-		string[length--] = hold;
+		data->tokens[i] = str_duplicate(_strtok(NULL, delimiter));
 	}
 }
